@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>[ Weather App ]</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 15px Arial;
+    }
+
+        .data_frame {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .data_frame td,
+        .data_frame th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .data_frame tr:nth-child(even) {
+            background-color: #efeff5;
+        }
+
+        .data_frame tr:hover {
+            background-color: #e0e0eb;
+        }
+
+        .data_frame th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: rgb(61, 61, 92);
+            color: white;
+        }
+
+
+        td:first-child {
+            background: rgba(165, 191, 248, 0.411);
+        }
+
+
+    input {
+      border: 1px solid transparent;
+      background-color: #f1f1f1;
+      padding: 5px;
+      font-size: 16px;
+    }
+
+    input[type=text] {
+      background-color: #f1f1f1;
+      width: 100%;
+    }
+
+
+    input[type=submit] {
+      background-color: rgb(61, 61, 92);
+      color: white;
+      cursor: pointer;
+    }
+
+  </style>
+
+  {{"decoupled-map"|googlemap_js(37.4419, -122.1419, markers=[(37.4419, -122.1419)])}}
+  {{mymap.js}}
+  {{sndmap.js}}
+
+</head>
+
+<body>
+
+  <a href="http:\\localhost:5000/"> Home | </a>&nbsp;
+  <a href="http:\\localhost:5000/mapview"> Back | </a>&nbsp;
+
+  <h3>[Weather App] </h3>
+  <p>Stations Available for below parameter</p>
+
+  {% for table in tables %} {{ table|safe }} {% endfor %}
+  <br>
+
+  {{sndmap.html}}
+
+</body>
+
+</html>

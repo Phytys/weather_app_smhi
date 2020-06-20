@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>[ Weather App ] </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 16px Arial;
+    }
+
+  </style>
+</head>
+
+<div align="center">
+  <body>
+    <h1>[ Weather App ]</h1>
+    <h4>Historic weather Sweden | by Glennan | via SMHI API</h4>
+    <p>Search a Site and get weather parameters from closest Weather-station</p>
+
+    <a href="/get_weather_data">Get weather data</a><br><br>
+
+    <a href="/parameters">List of weather parameters</a><br>
+    <a href="/stations">List of weather stations</a><br>
+    <a href="/mapview">Stations on map</a><br>
+
+    <br><br>
+
+    <img src="{{url_for('static', filename='snowy_mw.jpg')}}" alt="robot">
+
+</div>
+
+
+</html>
