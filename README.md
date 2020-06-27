@@ -14,6 +14,4 @@ Select one of your sites and get weather data from closest smhi weather-station.
 a.	Or serve using e.g. waitress
 5.	You are good to go.
 
-![GitHub Logo](/images/logo.png)
-Format: ![Alt Text](url)
 
