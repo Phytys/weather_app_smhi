@@ -12,12 +12,13 @@ from flask_googlemaps import Map, icons
 import io
 import base64
 from math import cos, asin, sqrt
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+import plotly
 from waitress import serve
 
-# Content: 1 Functions, 2 Site-list, 3 Flask app
+## Content: 1 Functions, 2 Site-list, 3 Flask app
 
+## Prototyped by Glenn Landgren Consulting
+## glennconsulting@outlook.com
 
 ########### 1 NOTE Functions ######################
 
@@ -29,10 +30,8 @@ def smhi_parameters():
     """
     smhi_version = "latest"
     smhi_ext = "json"
-
     parameters = {"version": smhi_version,
                   "ext": smhi_ext}
-
     url_entry_point = "https://opendata-download-metobs.smhi.se/api"
     url_template_full = Template(
         "/version/${version}.${ext}")
@@ -98,10 +97,9 @@ def smhi_stations(smhi_parameter):
 
 
 def smhi_api_request(smhi_parameter, smhi_station, smhi_period):
-    
     """ From smhi - get weather data
         parameters:
-        1. smhi_parameter: selected the weathter parameter (int)
+        1. smhi_parameter: the selected weathter parameter (int)
         2. smhi_station: selected weathter station (int)
         3. smhi_period: Valid values are "latest-hour", "latest-day", "latest-months"
         returns a pandas df ["Date", "Value"]
@@ -134,11 +132,11 @@ def smhi_api_request(smhi_parameter, smhi_station, smhi_period):
             smhi_data_df["Date"] = pd.to_datetime(smhi_data_df["Date"], unit="ms")
             smhi_data_df["Station_Key"] = smhi_station
             smhi_data_df["Parameter_Key"] = smhi_parameter
+
             return smhi_data_df
             
         except:
             return "No data found"
-
     else:
         return "No data found"
     
@@ -186,48 +184,23 @@ def closest(site, weather_param, period):
         if type(weather_data) != str: 
             return closest_location, dist_station, weather_data, asked_stations
     
-    # if no weather data can't be found... return default values below
+    # if weather data can't be found... return default values below
     closest_location = "N/A"
     dist_station = 0
     weather_data = "N/A"
     asked_stations = "N/A"
     return closest_location, dist_station, weather_data, asked_stations
 
-# build a simple graph in matplotlib
-def build_graph(x, x_label, y1, y1_label, title):
-    img = io.BytesIO()
-    ax = plt.gca()
-    fig, ax = plt.subplots(figsize=(12,6))
-    plt.plot(x, y1)
-    plt.title(title)
-    plt.rcParams["figure.figsize"] = (8,5)
-    plt.MaxNLocator(5)
-    plt.ylabel(y1_label)
-    plt.xlabel(x_label)
-    # rotate and align the tick labels so they look better
-    fig.autofmt_xdate()
-    # use a more precise date string for the x axis locations in the
-    ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
-
-    plt.savefig(img, format='png')
-    img.seek(0)
-    graph_url = base64.b64encode(img.getvalue()).decode()
-    plt.close()
-
-    return 'data:image/png;base64,{}'.format(graph_url)
-
-
-########### 2 NOTE Global objects ######################
+########### 2 NOTE SITE LIST ######################
 
 # import list of locations. Contains sites and coordinates.
 sites_coord = pd.read_excel("sites/my_sites.xlsx")
 
-
 ########### 3 NOTE FLASK APP ######################
 # initialize Flask application
 app = Flask(__name__)
-GoogleMaps(app)
 
+GoogleMaps(app) # used to show available stations on map
 
 @app.route('/')
 def home():
@@ -258,34 +231,37 @@ def get_weather_data():
 
         # If weather_data is a string, there is no data to show
         if type(weather_data) != str:
-            # build graph
+            # For graph
             if period == "latest-months":
                 x = weather_data["Date"].iloc[100:]
                 y1 = weather_data["Value"].iloc[100:]
-                graph_title = "Parameter: {prm} and period: {per}".format(prm= weather_parameter_text, per=period) 
             else:
                 x = weather_data["Date"]
                 y1 = weather_data["Value"]
 
             graph_title = "Parameter: {prm} and period: {per}".format(prm= weather_parameter_text, per=period)    
-            x_label = "Time"
-            y1_label = "Value"
-            # Call function to build graph
-            graph1_url = build_graph(x, x_label, y1, y1_label, graph_title)
 
-            # Fill placeholders with information
-            stations_asked = "Following weather stations were asked for data: " + str(asked_stations)
-            station = "Closest weather station with data: " + \
-                closest_smhi_station["Station_Name"]
-            distance_to_station = "Distance to weather station: " + \
-                str(round(dist_station)) + " Km"
+            # Build graph using plotly
+            graphs = [dict(data=[dict(x=x,y=y1)],layout=dict(title=graph_title))]
+            # Add "ids" to each of the graphs to pass up to the client for templating
+            ids = ['graph-{}'.format(i) for i, _ in enumerate(graphs)]
+            # Convert the figures to JSON
+            # PlotlyJSONEncoder appropriately converts pandas, datetime, etc
+            # objects to their JSON equivalents
+            graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
 
-            # Before rendering weather table, sort newes data on top
+            # Fill placeholders in html template with information
+            stations_asked = "Following weather stations were asked for data: {}".format(str(asked_stations))
+            station = "Closest weather station with data: {}".format(closest_smhi_station["Station_Name"])
+            distance_to_station = "Distance to weather station: {} Km".format(str(round(dist_station)))
+
+            # Before rendering weather table, sort newest data on top
             weather_data.sort_values(by="Date", ascending=False, inplace=True)
 
             return render_template('weather_data_returned.html', site=site_id, st_asked=stations_asked ,
                                    prm=weather_parameter_text, stn=station,
-                                   dst=distance_to_station, graph1=graph1_url,
+                                   dst=distance_to_station,
+                                   ids=ids, graphJSON=graphJSON,
                                    tables1=[weather_data.to_html(classes='data_frame', header=True, index=False)])
         else:
             return "No data available"

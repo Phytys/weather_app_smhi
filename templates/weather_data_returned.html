@@ -1,34 +1,28 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>[ Weather App ]</title>
     <style>
         body {
             font: 15px Arial;
         }
-
         .data_frame {
             font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
             border-collapse: collapse;
             width: 100%;
             font-size: 14px;
         }
-
         .data_frame td,
         .data_frame th {
             border: 1px solid #ddd;
             padding: 8px;
         }
-
         .data_frame tr:nth-child(even) {
             background-color: #efeff5;
         }
-
         .data_frame tr:hover {
             background-color: #e0e0eb;
         }
-
         .data_frame th {
             padding-top: 8px;
             padding-bottom: 8px;
@@ -36,12 +30,9 @@
             background-color: rgb(61, 61, 92);
             color: white;
         }
-
-
         td:first-child {
             background: rgba(165, 191, 248, 0.411);
         }
-
         input[type=text],
         select {
             display: inline-block;
@@ -49,7 +40,6 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-
         input[type=submit] {
             background-color: rgb(61, 61, 92);
             color: white;
@@ -60,32 +50,55 @@
             background-color: rgba(61, 61, 92, 0.514);
         }
     </style>
-
 </head>
 
 <body>
     <a href="/"> Home | </a>&nbsp;
-    <a href="/get_weather_data"> Back | </a>&nbsp;
-
+    <a href="/get_weather_data"> Back | </a>
 
     <h2>[ Weather App ]</h2>
-    <h4> Site: <b>{{site}}</b></h4>
+    <h3> Site: <b>{{site}}</b></h3>
     <b>{{prm}}</b><br><br>
     {{st_asked}}<br><br>
     {{stn}}<br><br>
     {{dst}}<br><br>
 
+    <!-- code below copied from plotly -->
     <div>
-    <img src="{{  graph1  }}"></img>
+    {% for id in ids %}
+    <div id="{{id}}"></div>
+    {% endfor %}
     </div>
-    <br>
 
-
-    {% for table in tables1 %} {{ table|safe }} {% endfor %}
-
-    <br>
+    <!-- standard cone to render table -->
+    <div>
+    <br>{% for table in tables1 %} {{ table|safe }} {% endfor %}<br>
     <a href="http:\\localhost:5000/">Home |</a>
-
+    </div>
 </body>
+
+<footer>
+    <!-- script copied from plotly -->
+    <!-- D3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script type="text/javascript">
+
+        var graphs = {{graphJSON | safe}};
+        var ids = {{ids | safe}};
+
+        for(var i in graphs) {
+            Plotly.plot(ids[i], // the ID of the div, created above
+                        graphs[i].data,
+                        graphs[i].layout || {});
+        }
+
+    </script>
+</footer>
+
 
 </html>
