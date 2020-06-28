@@ -14,4 +14,5 @@ Select one of your sites and get weather data from closest smhi weather-station.
 a.	Or serve using e.g. waitress
 5.	You are good to go.
 
-
+You will find a more detailed description here:
+https://transmissionvision.com/index.php/weather-app-for-mw-engineers/
